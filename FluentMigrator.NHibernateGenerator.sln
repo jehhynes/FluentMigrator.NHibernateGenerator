@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentMigrator.NHibernateGenerator", "FluentMigrator.NHibernateGenerator.csproj", "{1FDDEB54-B99D-475E-A312-A0CD53AEADE9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1FDDEB54-B99D-475E-A312-A0CD53AEADE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FDDEB54-B99D-475E-A312-A0CD53AEADE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FDDEB54-B99D-475E-A312-A0CD53AEADE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FDDEB54-B99D-475E-A312-A0CD53AEADE9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3D14F369-2CE0-4E9F-B78C-3BB7A3BB284C}
+	EndGlobalSection
+EndGlobal

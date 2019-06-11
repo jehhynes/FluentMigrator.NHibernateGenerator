@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>FluentMigratorNHibernateGenerator</id>
+    <version>1.0.21</version>
+    <authors>Jonathan Hynes</authors>
+    <projectUrl>https://github.com/jehhynes/FluentMigrator.NHibernateGenerator</projectUrl>
+    <licenseUrl>https://raw.githubusercontent.com/jehhynes/FluentMigrator.NHibernateGenerator/master/LICENSE</licenseUrl>
+    <releaseNotes>https://github.com/jehhynes/FluentMigrator.NHibernateGenerator/releases</releaseNotes>
+    <description>Adds a command to the package manager console to generate migrations for FluentMigrator based on NHibernate mappings.</description>
+    <copyright>Copyright 2019 Jonathan Hynes</copyright>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>true</developmentDependency>
+    <language>en-US</language>
+    <tags>fluentmigrator nhibernate</tags>
+    <dependencies>
+      <dependency id="FluentMigrator" version="3.2.1" />
+      <dependency id="NHibernate" version="4.0.4.4000" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Debug\FluentMigrator.NHibernateGenerator.dll" target="lib" />
+    <file src="FluentMigratorNHibernateGenerator.psm1" target="tools" />
+    <file src="FluentMigratorNHibernateGenerator.psd1" target="tools" />
+    <file src="init.ps1" target="tools" />
+  </files>
+</package>
