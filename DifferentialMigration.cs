@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 using FluentMigrator.Builders.Alter;
@@ -10,8 +11,8 @@ using NHibernate.Cfg;
 using NHibernate.Dialect;
 
 namespace FluentMigrator.NHibernateGenerator
-{ 
-    public class DifferentialMigration :  IEnumerable<DifferentialExpression>
+{
+    public class DifferentialMigration : IEnumerable<DifferentialExpression>
     {
         private readonly List<MigrationExpressionBase> _fromSchema;
         private readonly List<MigrationExpressionBase> _toSchema;
@@ -33,7 +34,7 @@ namespace FluentMigrator.NHibernateGenerator
             if (_fromSchema == null || _fromSchema.Count == 0)
                 return _toSchema.Select(x => new DifferentialExpression(x, null)).GetEnumerator();
 
-            return 
+            return
                 GetRemovedIndexes()
                 .Concat(GetRemovedForeignKeys())
                 .Concat(GetRemovedTables())
@@ -69,7 +70,7 @@ namespace FluentMigrator.NHibernateGenerator
         private IEnumerable<DifferentialExpression> GetRemovedIndexes()
         {
             var fromIxs = _fromSchema.OfType<CreateIndexExpression>().ToList();
-            
+
             var toIxs = _toSchema.OfType<CreateIndexExpression>().ToList();
 
             return fromIxs.Where(f => !toIxs.Any(t => AreSameIndexName(f.Index, t.Index)))
@@ -325,11 +326,17 @@ namespace FluentMigrator.NHibernateGenerator
             return MatchCollection(from.Columns, to.Columns, AreSameColumnDef);
         }
 
+        static readonly DbType[] _dbTypesWithMAX = new[] { DbType.AnsiString, DbType.Binary, DbType.Xml , DbType.String };
+        
         private bool AreSameColumnDef(ColumnDefinition a, ColumnDefinition b)
         {
+            //Special case to treat a string length of 1000000 as int.MaxValue
+            int? aSize = a == null ? null : _dbTypesWithMAX.Contains(a.Type.Value) && a.Size == 1000000 ? int.MaxValue : a.Size;
+            int? bSize = b == null ? null : _dbTypesWithMAX.Contains(b.Type.Value) && b.Size == 1000000 ? int.MaxValue : b.Size;
+
             bool sameName = a.Name == b.Name;
             bool sameType = a.Type == b.Type;
-            bool sameSize = a.Size == b.Size;
+            bool sameSize = aSize == bSize;
             bool samePrecision = a.Precision == b.Precision;
             bool sameCustomType = a.CustomType == b.CustomType;
             bool sameDefaultValue = Equals(a.DefaultValue, b.DefaultValue) || (a.DefaultValue is ColumnDefinition.UndefinedDefaultValue) && (b.DefaultValue is FluentMigrator.Model.ColumnDefinition.UndefinedDefaultValue);
