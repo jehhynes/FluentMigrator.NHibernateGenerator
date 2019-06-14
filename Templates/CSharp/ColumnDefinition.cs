@@ -22,9 +22,9 @@ namespace FluentMigrator.NHibernateGenerator.Templates.CSharp
                 tw.Write($@".AsCustom(""{columnDefinition.CustomType}"")");
             else if (colType == DbType.AnsiString || colType == DbType.Binary || colType == DbType.Xml || colType == DbType.String)
                 tw.Write($@".As{colType.ToString()}({(col.Size == int.MaxValue || col.Size == 1000000 ? "int.MaxValue" : col.Size.ToString())})");
-            else if (colType == DbType.Decimal && col.Size == 0)
+            else if (colType == DbType.Decimal && col.Size.GetValueOrDefault() == 0)
                 tw.Write(".AsDecimal()");
-            else if (colType == DbType.Decimal && col.Size != 0)
+            else if (colType == DbType.Decimal && col.Size.GetValueOrDefault() != 0)
                 tw.Write($@".AsDecimal({col.Size}, {col.Precision})");
             else if (colType == DbType.Single)
                 tw.Write(".AsFloat()");

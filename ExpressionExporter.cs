@@ -293,14 +293,10 @@ namespace FluentMigrator.NHibernateGenerator
 
             if (columnDefinition.Type == DbType.Decimal || columnDefinition.Type == DbType.Currency)
             {
-                if (!(c.Precision == 19 && c.Scale == 2))
+                if (c.IsPrecisionDefined())
                 {
-                    columnDefinition.Precision = c.Precision;
-                    columnDefinition.Size = c.Scale;
-                }
-                else
-                {
-                    columnDefinition.Size = 0;
+                    columnDefinition.Precision = c.Scale;
+                    columnDefinition.Size = c.Precision;
                 }
             }
 
@@ -309,7 +305,6 @@ namespace FluentMigrator.NHibernateGenerator
 
             if (columnDefinition.IsPrimaryKey)
             {
-                //columnDefinition.PrimaryKeyName = table.PrimaryKey.Name;
                 columnDefinition.PrimaryKeyName = "PK_" + columnDefinition.TableName;
             }
 
