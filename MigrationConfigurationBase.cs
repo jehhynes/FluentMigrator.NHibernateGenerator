@@ -32,13 +32,15 @@ namespace FluentMigrator.NHibernateGenerator
 
         public virtual GeneratedMigration Generate(string name)
         {
-            var @from = GetFromExpressions();
-            var @to = GetToExpressions();
-            var diff = new DifferentialMigration(@from, @to)
-                .Where(exp => FilterExpressions(@from, @to, exp.Up))
+            var from = GetFromExpressions();
+            var to = GetToExpressions();
+
+            var diff = new DifferentialMigration(from, to)
+                .Where(exp => FilterExpressions(from, to, exp.Up))
                 .ToList();
+
             var tf = new CSharpTemplateFromExpressionFactory();
-            var serializedConfiguration = SerializeConfiguration(@to);
+            var serializedConfiguration = SerializeConfiguration(to);
             var version = GenerateNextVersionNumber();
 
             var code = new Templates.CSharp.MigrationCodeFile

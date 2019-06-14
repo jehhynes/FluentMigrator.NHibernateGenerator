@@ -40,7 +40,7 @@ namespace FluentMigrator.NHibernateGenerator
                 .Where(t => t.IsPhysicalTable)
                 .ToList();
 
-            var collectionTables = _cfg.CollectionMappings.Select(c => c.CollectionTable)
+            var collectionTables = _cfg.CollectionMappings.Select(c => c.CollectionTable).Distinct()
                 .Where(t => !tables.Contains(t)).ToList();
 
             tables = tables.Concat(collectionTables).ToList();
