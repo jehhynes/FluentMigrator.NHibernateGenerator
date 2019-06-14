@@ -233,6 +233,7 @@ namespace FluentMigrator.NHibernateGenerator
         private static IEnumerable<MigrationExpressionBase> GetFKs(Table table)
         {
             return table.ForeignKeyIterator
+                .Where(x => x.HasPhysicalConstraint)
                 .Select(fk => GetCreateForeignKeyExpression(table, fk))
                 .Where(x => x != null)
                 .Cast<MigrationExpressionBase>();
