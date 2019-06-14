@@ -123,10 +123,8 @@ function Update-FM
     }
 	else 
 	{
-		Write-Host "Writing file"
 		$migration.Designer | Out-File -Encoding "UTF8" -Force $outputPathDesigner
 
-		Write-Host "Saving file"
 		$project.Save($null)
 
 		Write-Host "Updated migration designer file $newFileNameDesigner with latest model data"
