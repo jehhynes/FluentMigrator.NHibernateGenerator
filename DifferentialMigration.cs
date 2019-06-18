@@ -298,11 +298,12 @@ namespace FluentMigrator.NHibernateGenerator
                 .Where(x => !AreSameColumnDef(x.From, x.To)).ToList();
 
             var updatedCols = matches.Select(x => new DifferentialExpression(
-                new AlterColumnExpression
+                new ExtendedAlterColumnExpression
                 {
                     SchemaName = to.SchemaName,
                     TableName = to.TableName,
-                    Column = x.To
+                    Column = x.To,
+                    Previous = x.From
                 },
                 new AlterColumnExpression
                 {

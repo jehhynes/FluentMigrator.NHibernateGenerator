@@ -99,6 +99,7 @@
     <Compile Include="DifferentialExpression.cs" />
     <Compile Include="DifferentialMigration.cs" />
     <Compile Include="ExpressionExporter.cs" />
+    <Compile Include="ExtendedAlterColumnExpression.cs" />
     <Compile Include="GeneratedMigration.cs" />
     <Compile Include="NugetTooling.cs" />
     <Compile Include="MigrationConfigurationBase.cs" />

@@ -50,22 +50,25 @@ namespace FluentMigrator.NHibernateGenerator.Templates.CSharp
                 tw.Write($@".PrimaryKey({(!string.IsNullOrEmpty(col.PrimaryKeyName) ? $@"""{col.PrimaryKeyName}""" : null)})");
 
             if (!(col.DefaultValue is ColumnDefinition.UndefinedDefaultValue) && col.DefaultValue != null)
-            {
-                string strDefaultValue = col.DefaultValue.ToString(); //It's always a string from NH
-                bool isNumeric = col.Type == DbType.Byte || col.Type == DbType.Decimal || col.Type == DbType.Double 
-                    || col.Type == DbType.Int16 || col.Type == DbType.Int32 || col.Type == DbType.Int64 || col.Type == DbType.SByte 
-                    || col.Type == DbType.Single || col.Type == DbType.UInt16 || col.Type == DbType.UInt32 || col.Type == DbType.UInt64;
-
-                if (col.Type == DbType.Boolean)
-                    strDefaultValue = Convert.ToBoolean(int.Parse(strDefaultValue)).ToString().ToLower();
-                else if (!isNumeric)
-                    strDefaultValue = "\"" + strDefaultValue + "\"";
-
-                tw.Write($@".WithDefaultValue({strDefaultValue})");
-            }
+                tw.Write($@".WithDefaultValue({FormatDefaultValue(col)})");
 
             if (!string.IsNullOrEmpty(col.ColumnDescription))
                 tw.Write($@".WithColumnDescription(""{col.ColumnDescription}"")");
+        }
+
+        public static string FormatDefaultValue(ColumnDefinition col)
+        {
+            string strDefaultValue = col.DefaultValue.ToString(); //It's always a string from NH
+            bool isNumeric = col.Type == DbType.Byte || col.Type == DbType.Decimal || col.Type == DbType.Double
+                || col.Type == DbType.Int16 || col.Type == DbType.Int32 || col.Type == DbType.Int64 || col.Type == DbType.SByte
+                || col.Type == DbType.Single || col.Type == DbType.UInt16 || col.Type == DbType.UInt32 || col.Type == DbType.UInt64;
+
+            if (col.Type == DbType.Boolean)
+                strDefaultValue = Convert.ToBoolean(int.Parse(strDefaultValue)).ToString().ToLower();
+            else if (!isNumeric)
+                strDefaultValue = "\"" + strDefaultValue + "\"";
+
+            return strDefaultValue;
         }
     }
 }
