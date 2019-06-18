@@ -6,7 +6,7 @@ using FluentMigrator.NHibernateGenerator.Templates.CSharp;
 
 namespace FluentMigrator.NHibernateGenerator.Templates
 {
-    internal class CSharpTemplateFromExpressionFactory : ITemplateFromExpressionFactory
+    public class CSharpTemplateFromExpressionFactory : ITemplateFromExpressionFactory
     {
         private Dictionary<Type, Func<MigrationExpressionBase, ITemplate>> _templateLookup = InitTemplates();
 
@@ -37,7 +37,7 @@ namespace FluentMigrator.NHibernateGenerator.Templates
             };
         }
 
-        public ITemplate GetTemplate(MigrationExpressionBase expr)
+        public virtual ITemplate GetTemplate(MigrationExpressionBase expr)
         {
             var expressionType = expr.GetType();
             if (_templateLookup.ContainsKey(expressionType))

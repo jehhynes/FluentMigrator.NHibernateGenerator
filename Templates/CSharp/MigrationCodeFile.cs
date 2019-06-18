@@ -8,6 +8,7 @@ namespace FluentMigrator.NHibernateGenerator.Templates.CSharp
 {
     internal class MigrationCodeFile : ITemplate
     {
+        public virtual string MigrationBaseClassName { get; set; }
         public virtual string Namespace { get; set; }
         public virtual string Name { get; set; }
         public virtual long Version { get; set; }
@@ -32,7 +33,7 @@ using FluentMigrator;
 namespace {Namespace}
 {{
     [Migration({Version})]
-    public partial class {Name} : Migration
+    public partial class {Name} : {MigrationBaseClassName}
     {{
         public override void Up()
         {{");

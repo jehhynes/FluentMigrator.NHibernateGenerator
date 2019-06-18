@@ -4,7 +4,7 @@ using FluentMigrator.Model;
 
 namespace FluentMigrator.NHibernateGenerator.Templates.CSharp
 {
-    internal class CreateIndexExpressionTemplate : ExpressionTemplate<Expressions.CreateIndexExpression>
+    public class CreateIndexExpressionTemplate : ExpressionTemplate<Expressions.CreateIndexExpression>
     {
         public override void WriteTo(TextWriter tw)
         {

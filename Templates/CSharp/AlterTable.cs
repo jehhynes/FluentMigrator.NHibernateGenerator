@@ -4,7 +4,7 @@ using FluentMigrator.Model;
 
 namespace FluentMigrator.NHibernateGenerator.Templates.CSharp
 {
-    internal class AlterTableExpressionTemplate : ExpressionTemplate<Expressions.AlterTableExpression>
+    public class AlterTableExpressionTemplate : ExpressionTemplate<Expressions.AlterTableExpression>
     {
         public override void WriteTo(TextWriter tw)
         {

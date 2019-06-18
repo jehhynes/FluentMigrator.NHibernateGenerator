@@ -4,7 +4,7 @@ using FluentMigrator.Model;
 
 namespace FluentMigrator.NHibernateGenerator.Templates.CSharp
 {
-    internal class DeleteConstraintExpressionTemplate : ExpressionTemplate<Expressions.DeleteConstraintExpression>
+    public class DeleteConstraintExpressionTemplate : ExpressionTemplate<Expressions.DeleteConstraintExpression>
     {
         public override void WriteTo(TextWriter tw)
         {

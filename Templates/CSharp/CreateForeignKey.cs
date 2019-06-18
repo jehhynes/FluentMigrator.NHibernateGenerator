@@ -5,7 +5,7 @@ using FluentMigrator.Model;
 
 namespace FluentMigrator.NHibernateGenerator.Templates.CSharp
 {
-    internal class CreateForeignKeyExpressionTemplate : ExpressionTemplate<Expressions.CreateForeignKeyExpression>
+    public class CreateForeignKeyExpressionTemplate : ExpressionTemplate<Expressions.CreateForeignKeyExpression>
     {
         public override void WriteTo(TextWriter tw)
         {

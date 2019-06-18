@@ -14,6 +14,7 @@ namespace FluentMigrator.NHibernateGenerator
 {
     public abstract class MigrationConfigurationBase
     {
+        protected string MigrationBaseClassName { get; set; } = "Migration";
         protected string MigrationNamespace { get; set; }
         protected Assembly MigrationAssembly { get; set; }
 
@@ -30,6 +31,11 @@ namespace FluentMigrator.NHibernateGenerator
             return true;
         }
 
+        public virtual ITemplateFromExpressionFactory GetTemplateFromExpressionFactory()
+        {
+            return new CSharpTemplateFromExpressionFactory();
+        }
+
         public virtual GeneratedMigration Generate(string name)
         {
             var from = GetFromExpressions();
@@ -39,7 +45,7 @@ namespace FluentMigrator.NHibernateGenerator
                 .Where(exp => FilterExpressions(from, to, exp.Up))
                 .ToList();
 
-            var tf = new CSharpTemplateFromExpressionFactory();
+            var tf = GetTemplateFromExpressionFactory();
             var serializedConfiguration = SerializeConfiguration(to);
             var version = GenerateNextVersionNumber();
 
@@ -49,7 +55,8 @@ namespace FluentMigrator.NHibernateGenerator
                 Name = name,
                 Namespace = MigrationNamespace,
                 TemplateFactory = tf,
-                Version = version
+                Version = version,
+                MigrationBaseClassName = MigrationBaseClassName
             };
 
             var result = new GeneratedMigration()

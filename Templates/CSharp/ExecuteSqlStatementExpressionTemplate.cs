@@ -5,7 +5,7 @@ using System.Text;
 
 namespace FluentMigrator.NHibernateGenerator.Templates.CSharp
 {
-    internal class ExecuteSqlStatementExpressionTemplate : ExpressionTemplate<Expressions.ExecuteSqlStatementExpression>
+    public class ExecuteSqlStatementExpressionTemplate : ExpressionTemplate<Expressions.ExecuteSqlStatementExpression>
     {
         public override void WriteTo(TextWriter tw)
         {
