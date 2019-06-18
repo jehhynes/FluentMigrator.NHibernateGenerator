@@ -94,7 +94,7 @@ namespace FluentMigrator.NHibernateGenerator
 
         protected virtual long GenerateNextVersionNumber()
         {
-            var lastMigration = MigrationAssembly.ExportedTypes.Where(t => t.BaseType == typeof(Migration))
+            var lastMigration = MigrationAssembly.ExportedTypes.Where(t => typeof(Migration).IsAssignableFrom(t))
                .Where(s => HasConfigurationData(s))
                .Select(t => GetVersion(t))
                .OrderBy(x => x)
@@ -151,7 +151,7 @@ namespace FluentMigrator.NHibernateGenerator
 
         public static List<MigrationExpressionBase> GetFromExpressionList(Assembly migrationsAssembly)
         {
-            var lastMigration = migrationsAssembly.ExportedTypes.Where(t => t.BaseType == typeof(Migration))
+            var lastMigration = migrationsAssembly.ExportedTypes.Where(t => typeof(Migration).IsAssignableFrom(t))
                 .Where(s => HasConfigurationData(s))
                 .OrderBy(t => GetVersion(t))
                 .LastOrDefault();
