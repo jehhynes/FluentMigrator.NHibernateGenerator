@@ -38,58 +38,65 @@ namespace FluentMigrator.NHibernateGenerator
 
         public virtual GeneratedMigration Generate(string name)
         {
-            var from = GetFromExpressions();
-            var to = GetToExpressions();
-
-            var diff = new DifferentialMigration(from, to)
-                .Where(exp => FilterExpressions(from, to, exp.Up))
-                .ToList();
-
-            var tf = GetTemplateFromExpressionFactory();
-            var serializedConfiguration = SerializeConfiguration(to);
-            var version = GenerateNextVersionNumber();
-
-            var code = new Templates.CSharp.MigrationCodeFile
+            try
             {
-                Expressions = diff,
-                Name = name,
-                Namespace = MigrationNamespace,
-                TemplateFactory = tf,
-                Version = version,
-                MigrationBaseClassName = MigrationBaseClassName
-            };
+                var from = GetFromExpressions();
+                var to = GetToExpressions();
 
-            var result = new GeneratedMigration()
-            {
-                Name = name,
-                Version = version,
-                MigrationsDirectory = MigrationsDirectory,
-                FileNamePrefix = GetFileNamePrefix(version)
-            };
+                var diff = new DifferentialMigration(from, to)
+                    .Where(exp => FilterExpressions(from, to, exp.Up))
+                    .ToList();
 
-            using (var sw = new StringWriter())
-            {
-                code.WriteTo(sw);
-                sw.Flush();
-                result.Code = sw.GetStringBuilder().ToString();
+                var tf = GetTemplateFromExpressionFactory();
+                var serializedConfiguration = SerializeConfiguration(to);
+                var version = GenerateNextVersionNumber();
+
+                var code = new Templates.CSharp.MigrationCodeFile
+                {
+                    Expressions = diff,
+                    Name = name,
+                    Namespace = MigrationNamespace,
+                    TemplateFactory = tf,
+                    Version = version,
+                    MigrationBaseClassName = MigrationBaseClassName
+                };
+
+                var result = new GeneratedMigration()
+                {
+                    Name = name,
+                    Version = version,
+                    MigrationsDirectory = MigrationsDirectory,
+                    FileNamePrefix = GetFileNamePrefix(version)
+                };
+
+                using (var sw = new StringWriter())
+                {
+                    code.WriteTo(sw);
+                    sw.Flush();
+                    result.Code = sw.GetStringBuilder().ToString();
+                }
+
+                var designer = new Templates.CSharp.MigrationDesignerFile
+                {
+                    Name = name,
+                    Namespace = MigrationNamespace,
+                    SerializedConfiguration = serializedConfiguration,
+                    Version = version
+                };
+
+                using (var sw = new StringWriter())
+                {
+                    designer.WriteTo(sw);
+                    sw.Flush();
+                    result.Designer = sw.GetStringBuilder().ToString();
+                }
+
+                return result;
             }
-
-            var designer = new Templates.CSharp.MigrationDesignerFile
+            catch (Exception ex)
             {
-                Name = name,
-                Namespace = MigrationNamespace,
-                SerializedConfiguration = serializedConfiguration,
-                Version = version
-            };
-
-            using (var sw = new StringWriter())
-            {
-                designer.WriteTo(sw);
-                sw.Flush();
-                result.Designer = sw.GetStringBuilder().ToString();
+                return new GeneratedMigration() { ErrorMessage = ex.Message };
             }
-
-            return result;
         }
 
         protected virtual long GenerateNextVersionNumber()

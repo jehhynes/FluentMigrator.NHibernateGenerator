@@ -39,6 +39,11 @@ function Add-FM
 		throw "Failed to generate migration"
 	}
 
+	if ($migration.ErrorMessage)
+	{
+		throw $migration.ErrorMessage
+	}
+
 	$migrationsPath = Join-Path $localPath $migration.MigrationsDirectory
 	$newFileName = $migration.FileNamePrefix + $migration.Name + ".cs"
 	$newFileNameDesigner = $migration.FileNamePrefix + $migration.Name + ".Designer.cs"
@@ -96,6 +101,16 @@ function Update-FM
 
 	$migration = [FluentMigrator.NHibernateGenerator.NugetTooling]::Generate($targetPath, $assemblyName, $Name)
 	
+	if(-not ($migration))
+	{
+		throw "Failed to generate migration"
+	}
+
+	if ($migration.ErrorMessage)
+	{
+		throw $migration.ErrorMessage
+	}
+
 	$migrationsPath = Join-Path $localPath $migration.MigrationsDirectory
 	$migrationFileNameEndsWith = $migration.Name + ".cs"
 	$migrationDesignerFileNameEndsWith = $migration.Name + ".Designer.cs"
