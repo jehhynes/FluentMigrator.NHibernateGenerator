@@ -69,7 +69,6 @@ function Update-FM
 {
     [CmdletBinding(DefaultParameterSetName = 'Name')]
     param (
-        #[parameter(Position = 0, Mandatory = $true)]
         [string] $Name,
         [string] $ProjectName)
 
@@ -101,11 +100,29 @@ function Update-FM
     if ($Name)
     {
 	    $migration = [FluentMigrator.NHibernateGenerator.NugetTooling]::Generate($targetPath, $assemblyName, $Name)
-        $migrationsPath = Join-Path $localPath $migration.MigrationsDirectory
+    }
+    else
+    {
+	    $migration = [FluentMigrator.NHibernateGenerator.NugetTooling]::Generate($targetPath, $assemblyName, "NOTAREALNAME")
+    }
 
+    if(-not ($migration))
+	{
+		throw "Failed to generate migration"
+	}
+
+	if ($migration.ErrorMessage)
+	{
+		throw $migration.ErrorMessage
+	}
+    
+    $migrationsPath = Join-Path $localPath $migration.MigrationsDirectory
+	$migrationsFolderItem = Find-Project-Item $project $migration.MigrationsDirectory
+
+    if ($Name)
+    {
 	    $migrationFileNameEndsWith = $migration.Name + ".cs"
 	    $migrationDesignerFileNameEndsWith = $migration.Name + ".Designer.cs"
-	    $migrationsFolderItem = Find-Project-Item $project $migration.MigrationsDirectory
 	    $matchingMigrationFileItem = $migrationsFolderItem.ProjectItems | Where Name -like *$migrationFileNameEndsWith
 
 	    if (-not($matchingMigrationFileItem))
@@ -122,17 +139,12 @@ function Update-FM
     }
     else
     {
-	    $migration = [FluentMigrator.NHibernateGenerator.NugetTooling]::Generate($targetPath, $assemblyName, "NOTREALLYANAME")
-        $migrationsPath = Join-Path $localPath $migration.MigrationsDirectory
-
-	    $migrationsFolderItem = Find-Project-Item $project $migration.MigrationsDirectory
         $matchingMigrationFileItem = $migrationsFolderItem.ProjectItems | Where Name -like *.cs | Sort-Object -Property Name -Descending | Select-Object -First 1
 
         $confirmMigrationFileItem = Read-Host "Found $($matchingMigrationFileItem.Name). Is this the file you'd like to update? (Y/N)"
-
         if (-not($confirmMigrationFileItem -eq "y" -or $confirmMigrationFileItem -eq "Y"))
         {
-		    Write-Host "Update aborted."
+		    Write-Host "Update aborted"
             return
         }
 
