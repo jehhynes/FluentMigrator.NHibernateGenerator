@@ -21,7 +21,7 @@ namespace FluentMigrator.NHibernateGenerator
                 ApplicationBase = targetDir,
                 ConfigurationFile = targetFileName + ".config"
             };
-            
+
             var appDomain = AppDomain.CreateDomain("NHMigrations" + Convert.ToBase64String(Guid.NewGuid().ToByteArray()), null, info);
 
             var proxy = (MigrationProxy)appDomain.CreateInstanceAndUnwrap(typeof(MigrationProxy).Assembly.FullName, typeof(MigrationProxy).FullName);
@@ -29,7 +29,7 @@ namespace FluentMigrator.NHibernateGenerator
             var migration = proxy.Generate(targetDir, assemblyName, migrationName);
 
             AppDomain.Unload(appDomain);
-            
+
             return migration;
         }
 

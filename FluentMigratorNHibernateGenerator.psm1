@@ -17,7 +17,7 @@ function Add-FM
     else {
         $project = Get-Project
     }
-    
+
 	Build-Project $project
 
 	$installPath = Get-ThisPackageInstallPath $project
@@ -26,17 +26,22 @@ function Add-FM
 	$utilityAssembly = [System.Reflection.Assembly]::LoadFrom((Join-Path $toolsPath FluentMigrator.NHibernateGenerator.dll))
 
 	$localPath = $project.Properties.Item("LocalPath").Value.ToString()
-	$binDirectory = ($project.ConfigurationManager.ActiveConfiguration.Properties | Where Name -match OutputPath).Value 
+	$binDirectory = ($project.ConfigurationManager.ActiveConfiguration.Properties | Where Name -match OutputPath).Value
 	$outputFileName = $project.Properties.Item("OutputFileName").Value.ToString()
 
 	$targetPath = [System.IO.Path]::Combine($localPath, $binDirectory, $outputFileName)
 	$assemblyName = $project.Properties.Item("AssemblyName").Value.ToString();
 
 	$migration = [FluentMigrator.NHibernateGenerator.NugetTooling]::Generate($targetPath, $assemblyName, $Name)
-	
+
 	if(-not ($migration))
 	{
 		throw "Failed to generate migration"
+	}
+
+	if ($migration.ErrorMessage)
+	{
+		throw $migration.ErrorMessage
 	}
 
 	$migrationsPath = Join-Path $localPath $migration.MigrationsDirectory
@@ -78,7 +83,7 @@ function Update-FM
     else {
         $project = Get-Project
     }
-    
+
 	Build-Project $project
 
 	$installPath = Get-ThisPackageInstallPath $project
@@ -87,27 +92,27 @@ function Update-FM
 	$utilityAssembly = [System.Reflection.Assembly]::LoadFrom((Join-Path $toolsPath FluentMigrator.NHibernateGenerator.dll))
 
 	$localPath = $project.Properties.Item("LocalPath").Value.ToString()
-	$binDirectory = ($project.ConfigurationManager.ActiveConfiguration.Properties | Where Name -match OutputPath).Value 
+	$binDirectory = ($project.ConfigurationManager.ActiveConfiguration.Properties | Where Name -match OutputPath).Value
 	$outputFileName = $project.Properties.Item("OutputFileName").Value.ToString()
 
 	$targetPath = [System.IO.Path]::Combine($localPath, $binDirectory, $outputFileName)
 	$assemblyName = $project.Properties.Item("AssemblyName").Value.ToString();
-    
+
     if ($Name)
     {
-	    $migration = [FluentMigrator.NHibernateGenerator.NugetTooling]::Generate($targetPath, $assemblyName, $Name)	
+	    $migration = [FluentMigrator.NHibernateGenerator.NugetTooling]::Generate($targetPath, $assemblyName, $Name)
         $migrationsPath = Join-Path $localPath $migration.MigrationsDirectory
 
 	    $migrationFileNameEndsWith = $migration.Name + ".cs"
 	    $migrationDesignerFileNameEndsWith = $migration.Name + ".Designer.cs"
 	    $migrationsFolderItem = Find-Project-Item $project $migration.MigrationsDirectory
 	    $matchingMigrationFileItem = $migrationsFolderItem.ProjectItems | Where Name -like *$migrationFileNameEndsWith
-	
+
 	    if (-not($matchingMigrationFileItem))
 	    {
 		    throw "Could not find migration file in migrations folder ending with $migrationFileNameEndsWith"
 	    }
-        
+
 	    $matchingMigrationDesignerFileItem = $matchingMigrationFileItem.ProjectItems | Where Name -like *$migrationDesignerFileNameEndsWith
 
 	    if (-not($matchingMigrationDesignerFileItem))
@@ -117,7 +122,7 @@ function Update-FM
     }
     else
     {
-	    $migration = [FluentMigrator.NHibernateGenerator.NugetTooling]::Generate($targetPath, $assemblyName, "NOTREALLYANAME")	
+	    $migration = [FluentMigrator.NHibernateGenerator.NugetTooling]::Generate($targetPath, $assemblyName, "NOTREALLYANAME")
         $migrationsPath = Join-Path $localPath $migration.MigrationsDirectory
 
 	    $migrationsFolderItem = Find-Project-Item $project $migration.MigrationsDirectory
@@ -146,7 +151,7 @@ function Update-FM
     {
         throw "Could not find migration file $outputPathDesigner"
     }
-	else 
+	else
 	{
 		$migration.Designer | Out-File -Encoding "UTF8" -Force $outputPathDesigner
 
@@ -167,7 +172,7 @@ function Find-Project-Item($project, $directory)
 			$currentItem = $currentItem.ProjectItems | Where Name -like $folder
 		}
 	}
-	
+
 	return $currentItem
 }
 
@@ -195,17 +200,17 @@ function Get-ThisPackageInstallPath($project)
 
         throw "The FluentMigratorNHibernateGenerator package is not installed on project '$projectName'."
     }
-    
+
     return Get-PackageInstallPath $package
 }
-    
+
 function Get-PackageInstallPath($package)
 {
     $componentModel = Get-VsComponentModel
     $packageInstallerServices = $componentModel.GetService([NuGet.VisualStudio.IVsPackageInstallerServices])
 
     $vsPackage = $packageInstallerServices.GetInstalledPackages() | ?{ $_.Id -eq $package.Id -and $_.Version -eq $package.Version }
-    
+
     return $vsPackage.InstallPath
 }
 

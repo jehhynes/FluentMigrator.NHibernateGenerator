@@ -11,5 +11,6 @@ namespace FluentMigrator.NHibernateGenerator
         public string Designer { get; set; }
         public string MigrationsDirectory { get; set; }
         public string FileNamePrefix { get; set; }
+        public string ErrorMessage { get; set; }
     }
 }

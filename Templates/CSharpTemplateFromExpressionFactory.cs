@@ -15,6 +15,7 @@ namespace FluentMigrator.NHibernateGenerator.Templates
             return new Dictionary<Type, Func<MigrationExpressionBase, ITemplate>>
             {
                 {typeof(AlterColumnExpression), e => new AlterColumnExpressionTemplate { Expression = (AlterColumnExpression)e} },
+                {typeof(ExtendedAlterColumnExpression), e => new AlterColumnExpressionTemplate { Expression = (AlterColumnExpression)e} },
                 {typeof(AlterDefaultConstraintExpression), e => new AlterDefaultConstraint { Expression = (AlterDefaultConstraintExpression)e} },
                 {typeof(AlterSchemaExpression), e => new AlterSchemaExpressionTemplate { Expression = (AlterSchemaExpression)e} },
                 {typeof(AlterTableExpression), e => new AlterTableExpressionTemplate { Expression = (AlterTableExpression)e} },
