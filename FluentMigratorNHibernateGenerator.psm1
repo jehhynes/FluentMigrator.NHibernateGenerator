@@ -64,8 +64,7 @@ function Update-FM
 {
     [CmdletBinding(DefaultParameterSetName = 'Name')]
     param (
-        [parameter(Position = 0,
-            Mandatory = $true)]
+        #[parameter(Position = 0, Mandatory = $true)]
         [string] $Name,
         [string] $ProjectName)
 
@@ -93,26 +92,52 @@ function Update-FM
 
 	$targetPath = [System.IO.Path]::Combine($localPath, $binDirectory, $outputFileName)
 	$assemblyName = $project.Properties.Item("AssemblyName").Value.ToString();
+    
+    if ($Name)
+    {
+	    $migration = [FluentMigrator.NHibernateGenerator.NugetTooling]::Generate($targetPath, $assemblyName, $Name)	
+        $migrationsPath = Join-Path $localPath $migration.MigrationsDirectory
 
-	$migration = [FluentMigrator.NHibernateGenerator.NugetTooling]::Generate($targetPath, $assemblyName, $Name)
+	    $migrationFileNameEndsWith = $migration.Name + ".cs"
+	    $migrationDesignerFileNameEndsWith = $migration.Name + ".Designer.cs"
+	    $migrationsFolderItem = Find-Project-Item $project $migration.MigrationsDirectory
+	    $matchingMigrationFileItem = $migrationsFolderItem.ProjectItems | Where Name -like *$migrationFileNameEndsWith
 	
-	$migrationsPath = Join-Path $localPath $migration.MigrationsDirectory
-	$migrationFileNameEndsWith = $migration.Name + ".cs"
-	$migrationDesignerFileNameEndsWith = $migration.Name + ".Designer.cs"
-	$migrationsFolderItem = Find-Project-Item $project $migration.MigrationsDirectory
-	$matchingMigrationFileItem = $migrationsFolderItem.ProjectItems | Where Name -like *$migrationFileNameEndsWith
-	
-	if (-not($matchingMigrationFileItem))
-	{
-		throw "Could not find migration file in migrations folder ending with $migrationFileNameEndsWith"
-	}
+	    if (-not($matchingMigrationFileItem))
+	    {
+		    throw "Could not find migration file in migrations folder ending with $migrationFileNameEndsWith"
+	    }
+        
+	    $matchingMigrationDesignerFileItem = $matchingMigrationFileItem.ProjectItems | Where Name -like *$migrationDesignerFileNameEndsWith
 
-	$matchingMigrationDesignerFileItem = $matchingMigrationFileItem.ProjectItems | Where Name -like *$migrationDesignerFileNameEndsWith
+	    if (-not($matchingMigrationDesignerFileItem))
+	    {
+		    throw "Could not find migration designer file in migrations folder ending with $migrationDesignerFileNameEndsWith"
+	    }
+    }
+    else
+    {
+	    $migration = [FluentMigrator.NHibernateGenerator.NugetTooling]::Generate($targetPath, $assemblyName, "NOTREALLYANAME")	
+        $migrationsPath = Join-Path $localPath $migration.MigrationsDirectory
 
-	if (-not($matchingMigrationDesignerFileItem))
-	{
-		throw "Could not find migration designer file in migrations folder ending with $migrationDesignerFileNameEndsWith"
-	}
+	    $migrationsFolderItem = Find-Project-Item $project $migration.MigrationsDirectory
+        $matchingMigrationFileItem = $migrationsFolderItem.ProjectItems | Where Name -like *.cs | Sort-Object -Property Name -Descending | Select-Object -First 1
+
+        $confirmMigrationFileItem = Read-Host "Found $($matchingMigrationFileItem.Name). Is this the file you'd like to update? (Y/N)"
+
+        if (-not($confirmMigrationFileItem -eq "y" -or $confirmMigrationFileItem -eq "Y"))
+        {
+		    Write-Host "Update aborted."
+            return
+        }
+
+        $matchingMigrationDesignerFileItem = $matchingMigrationFileItem.ProjectItems | Where Name -like *.Designer.cs
+
+	    if (-not($matchingMigrationDesignerFileItem))
+	    {
+		    throw "Could not find migration designer file in migrations folder for $($matchingMigrationFileItem.Name)."
+	    }
+    }
 
 	$newFileNameDesigner = $matchingMigrationDesignerFileItem.Name
     $outputPathDesigner = Join-Path $migrationsPath $newFileNameDesigner
