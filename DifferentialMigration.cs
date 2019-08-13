@@ -6,7 +6,9 @@ using System.Linq;
 
 using FluentMigrator.Builders.Alter;
 using FluentMigrator.Expressions;
+using FluentMigrator.Infrastructure.Extensions;
 using FluentMigrator.Model;
+using FluentMigrator.SqlServer;
 using NHibernate.Cfg;
 using NHibernate.Dialect;
 
@@ -237,6 +239,11 @@ namespace FluentMigrator.NHibernateGenerator
             return MatchCollection(fromIx, toIx, (a, b) => a.Name == b.Name && a.Direction == b.Direction);
         }
 
+        private bool MatchIndexIncludes(ICollection<IndexIncludeDefinition> fromIx, ICollection<IndexIncludeDefinition> toIx)
+        {
+            return MatchCollection(fromIx, toIx, (a, b) => a.Name == b.Name);
+        }
+
         private bool MatchStrings(ICollection<string> from, ICollection<string> to)
         {
             return MatchCollection(from, to, (a, b) => a == b);
@@ -266,7 +273,7 @@ namespace FluentMigrator.NHibernateGenerator
         {
             return fromIx.SchemaName == toIx.SchemaName && fromIx.TableName == toIx.TableName
                 && fromIx.IsClustered == toIx.IsClustered && fromIx.IsUnique == toIx.IsUnique
-                && MatchIndexColumns(fromIx.Columns, toIx.Columns) && MatchIndexColumns(fromIx.Columns, toIx.Columns);
+                && MatchIndexColumns(fromIx.Columns, toIx.Columns) && MatchIndexIncludes(fromIx.GetIncludes(), toIx.GetIncludes());
         }
 
         private IEnumerable<DifferentialExpression> GetAlters(CreateTableExpression from, CreateTableExpression to)

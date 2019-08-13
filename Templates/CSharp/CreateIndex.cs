@@ -29,6 +29,16 @@ namespace FluentMigrator.NHibernateGenerator.Templates.CSharp
 
             foreach (var c in Expression.Index.Columns)
                 tw.Write($@".OnColumn(""{c.Name}"").{c.Direction.ToString()}()");
+
+            var includes = Expression.Index.GetIncludes();
+            if (includes.Count > 0)
+            {
+                tw.Write($@"
+                ");
+
+                foreach (var c in includes)
+                    tw.Write($@".Include(""{c.Name}"")");
+            }
         }
     }
 }

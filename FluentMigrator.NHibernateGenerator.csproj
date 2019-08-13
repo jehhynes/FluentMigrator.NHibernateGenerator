@@ -56,6 +56,9 @@
     <Reference Include="FluentMigrator.Abstractions, Version=3.2.1.0, Culture=neutral, PublicKeyToken=aacfc7de5acabf05, processorArchitecture=MSIL">
       <HintPath>packages\FluentMigrator.Abstractions.3.2.1\lib\net461\FluentMigrator.Abstractions.dll</HintPath>
     </Reference>
+    <Reference Include="FluentMigrator.Extensions.SqlServer, Version=3.2.1.0, Culture=neutral, PublicKeyToken=aacfc7de5acabf05, processorArchitecture=MSIL">
+      <HintPath>packages\FluentMigrator.Extensions.SqlServer.3.2.1\lib\net461\FluentMigrator.Extensions.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="Iesi.Collections, Version=4.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <HintPath>packages\Iesi.Collections.4.0.4\lib\net461\Iesi.Collections.dll</HintPath>
     </Reference>
@@ -112,6 +115,7 @@
     <Compile Include="DifferentialMigration.cs" />
     <Compile Include="ExpressionExporter.cs" />
     <Compile Include="ExtendedAlterColumnExpression.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="GeneratedMigration.cs" />
     <Compile Include="NugetTooling.cs" />
     <Compile Include="MigrationConfigurationBase.cs" />
