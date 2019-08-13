@@ -12,13 +12,14 @@ namespace FluentMigrator.NHibernateGenerator.Templates.CSharp
         public virtual string Name { get; set; }
         public virtual long Version { get; set; }
         public virtual string SerializedConfiguration { get; set; }
+        public virtual string AdditionalUsings { get; set; }
 
         public void WriteTo(TextWriter tw)
         {
             tw.Write(
 $@"using System;
 using FluentMigrator;
-
+{(AdditionalUsings == null ? null : (AdditionalUsings + Environment.NewLine))}
 namespace {Namespace}
 {{
     public partial class {Name}

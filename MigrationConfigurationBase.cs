@@ -76,12 +76,14 @@ namespace FluentMigrator.NHibernateGenerator
                     result.Code = sw.GetStringBuilder().ToString();
                 }
 
+                bool hasIncludes = to.OfType<CreateIndexExpression>().Where(x => x.Index.GetIncludes().Any()).Any();
                 var designer = new Templates.CSharp.MigrationDesignerFile
                 {
                     Name = name,
                     Namespace = MigrationNamespace,
                     SerializedConfiguration = serializedConfiguration,
-                    Version = version
+                    Version = version,
+                    AdditionalUsings = hasIncludes ? "using FluentMigrator.SqlServer;" : null
                 };
 
                 using (var sw = new StringWriter())
