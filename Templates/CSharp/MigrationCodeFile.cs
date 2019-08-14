@@ -14,6 +14,7 @@ namespace FluentMigrator.NHibernateGenerator.Templates.CSharp
         public virtual long Version { get; set; }
         public virtual IEnumerable<DifferentialExpression> Expressions { get; set; }
         public virtual ITemplateFromExpressionFactory TemplateFactory { get; set; }
+        public virtual string AdditionalUsings { get; set; }
 
         public void WriteTo(TextWriter tw)
         {
@@ -29,7 +30,7 @@ using System.Linq;
 using System.Web;
 using System.Linq.Expressions;
 using FluentMigrator;
-
+{(AdditionalUsings == null ? null : (AdditionalUsings + Environment.NewLine))}
 namespace {Namespace}
 {{
     [Migration({Version})]

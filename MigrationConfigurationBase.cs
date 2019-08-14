@@ -51,6 +51,7 @@ namespace FluentMigrator.NHibernateGenerator
                 var serializedConfiguration = SerializeConfiguration(to);
                 var version = GenerateNextVersionNumber();
 
+                bool hasIncludes = to.OfType<CreateIndexExpression>().Where(x => x.Index.GetIncludes().Any()).Any();
                 var code = new Templates.CSharp.MigrationCodeFile
                 {
                     Expressions = diff,
@@ -58,7 +59,8 @@ namespace FluentMigrator.NHibernateGenerator
                     Namespace = MigrationNamespace,
                     TemplateFactory = tf,
                     Version = version,
-                    MigrationBaseClassName = MigrationBaseClassName
+                    MigrationBaseClassName = MigrationBaseClassName,
+                    AdditionalUsings = hasIncludes ? "using FluentMigrator.SqlServer;" : null
                 };
 
                 var result = new GeneratedMigration()
@@ -76,14 +78,12 @@ namespace FluentMigrator.NHibernateGenerator
                     result.Code = sw.GetStringBuilder().ToString();
                 }
 
-                bool hasIncludes = to.OfType<CreateIndexExpression>().Where(x => x.Index.GetIncludes().Any()).Any();
                 var designer = new Templates.CSharp.MigrationDesignerFile
                 {
                     Name = name,
                     Namespace = MigrationNamespace,
                     SerializedConfiguration = serializedConfiguration,
-                    Version = version,
-                    AdditionalUsings = hasIncludes ? "using FluentMigrator.SqlServer;" : null
+                    Version = version
                 };
 
                 using (var sw = new StringWriter())
