@@ -38,6 +38,7 @@ namespace FluentMigrator.NHibernateGenerator
 
             return
                 GetRemovedIndexes()
+                .Concat(GetRemovedPrimaryKeys())
                 .Concat(GetRemovedForeignKeys())
                 .Concat(GetRemovedTables())
                 .Concat(GetRemovedSequences())
@@ -48,6 +49,7 @@ namespace FluentMigrator.NHibernateGenerator
                 .Concat(GetNewSchemas())
                 .Concat(GetNewSequences())
                 .Concat(GetNewTables())
+                .Concat(GetNewPrimaryKeys())
                 .Concat(GetNewForeignKeys())
                 .Concat(GetNewIndexes())
                 .Concat(GetAuxObjects())
@@ -175,7 +177,42 @@ namespace FluentMigrator.NHibernateGenerator
             var toFks = _toSchema.OfType<CreateForeignKeyExpression>();
 
             return fromFks.Where(ff => !toFks.Any(tf => AreSameFk(ff.ForeignKey, tf.ForeignKey)))
-                .Select(ff => new DifferentialExpression(ff.Reverse(), ff));
+                .Select(x => new DifferentialExpression(x.Reverse(), x));
+        }
+
+        IEnumerable<CreateConstraintExpression> GetPrimaryKeys(IEnumerable<MigrationExpressionBase> schema)
+        {
+            return schema.OfType<CreateTableExpression>().Where(t => t.Columns.Any(c => c.IsPrimaryKey))
+                .Select(t => new CreateConstraintExpression(ConstraintType.PrimaryKey)
+                {
+                    Constraint = new ConstraintDefinition(ConstraintType.PrimaryKey)
+                    {
+                        ConstraintName = t.Columns.First().PrimaryKeyName,
+                        SchemaName = t.SchemaName,
+                        TableName = t.TableName,
+                        Columns = t.Columns.Where(x => x.IsPrimaryKey).Select(c => c.Name).ToList()
+                    }
+                });
+        }
+
+        private IEnumerable<DifferentialExpression> GetNewPrimaryKeys()
+        {
+            var fromPks = GetPrimaryKeys(_fromSchema);
+            var toPks = GetPrimaryKeys(_toSchema);
+
+            return toPks.Where(toPk => !fromPks.Any(fromPk => AreSameConstraint(toPk.Constraint, fromPk.Constraint)))
+                .Where(x => _fromSchema.OfType<CreateTableExpression>().Any(t => t.TableName == x.Constraint.TableName)) //table previously existed
+                .Select(x => new DifferentialExpression(x));
+        }
+
+        private IEnumerable<DifferentialExpression> GetRemovedPrimaryKeys()
+        {
+            var fromPks = GetPrimaryKeys(_fromSchema);
+            var toPks = GetPrimaryKeys(_toSchema);
+
+            return fromPks.Where(fromPk => !toPks.Any(toPk => AreSameConstraint(fromPk.Constraint, toPk.Constraint)))
+                .Where(x => _toSchema.OfType<CreateTableExpression>().Any(t => t.TableName == x.Constraint.TableName)) //table still exists
+                .Select(x => new DifferentialExpression(x.Reverse(), x));
         }
 
         private IEnumerable<DifferentialExpression> GetNewIndexes()
@@ -268,6 +305,15 @@ namespace FluentMigrator.NHibernateGenerator
                 && MatchStrings(fromFk.ForeignColumns, toFk.ForeignColumns)
                 && MatchStrings(fromFk.PrimaryColumns, toFk.PrimaryColumns);
         }
+        private bool AreSameConstraint(ConstraintDefinition fromConstraint, ConstraintDefinition toConstraint)
+        {
+            return fromConstraint.ConstraintName == toConstraint.ConstraintName
+                && fromConstraint.IsPrimaryKeyConstraint == toConstraint.IsPrimaryKeyConstraint
+                && fromConstraint.IsUniqueConstraint == toConstraint.IsUniqueConstraint
+                && fromConstraint.TableName == toConstraint.TableName
+                && fromConstraint.SchemaName == toConstraint.SchemaName
+                && MatchStrings(fromConstraint.Columns, toConstraint.Columns);
+        }
 
         private bool AreSameIndexName(IndexDefinition fromIx, IndexDefinition toIx)
         {
@@ -351,8 +397,8 @@ namespace FluentMigrator.NHibernateGenerator
             bool sameIsForeignKey = a.IsForeignKey == b.IsForeignKey;
             bool sameIsIdentity = a.IsIdentity == b.IsIdentity;
             bool sameIsIndexed = a.IsIndexed == b.IsIndexed;
-            bool sameIsPrimaryKey = a.IsPrimaryKey == b.IsPrimaryKey;
-            bool samePrimaryKeyName = a.PrimaryKeyName == b.PrimaryKeyName;
+            //bool sameIsPrimaryKey = a.IsPrimaryKey == b.IsPrimaryKey;
+            //bool samePrimaryKeyName = a.PrimaryKeyName == b.PrimaryKeyName;
             bool sameIsNullable = a.IsNullable == b.IsNullable;
             bool sameIsUnique = a.IsUnique == b.IsUnique;
             bool sameTableName = a.TableName == b.TableName;
@@ -361,10 +407,11 @@ namespace FluentMigrator.NHibernateGenerator
             bool sameCollationName = a.CollationName == b.CollationName;
 
             bool isEverythingTheSame = sameName && sameType && sameSize && samePrecision && sameCustomType && sameDefaultValue && sameIsForeignKey &&
-                sameIsIdentity && sameIsIndexed && sameIsPrimaryKey && samePrimaryKeyName && sameIsNullable && sameIsUnique &&
+                sameIsIdentity && sameIsIndexed /*&& sameIsPrimaryKey && samePrimaryKeyName*/ && sameIsNullable && sameIsUnique &&
                 sameTableName && sameModificationType && sameColumnDescription && sameCollationName;
 
             return isEverythingTheSame;
         }
+
     }
 }

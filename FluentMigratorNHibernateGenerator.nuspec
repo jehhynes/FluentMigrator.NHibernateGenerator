@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>FluentMigratorNHibernateGenerator</id>
-    <version>1.1.3</version>
+    <version>1.1.4</version>
     <authors>Jonathan Hynes</authors>
     <projectUrl>https://github.com/jehhynes/FluentMigrator.NHibernateGenerator</projectUrl>
     <licenseUrl>https://raw.githubusercontent.com/jehhynes/FluentMigrator.NHibernateGenerator/master/LICENSE</licenseUrl>
