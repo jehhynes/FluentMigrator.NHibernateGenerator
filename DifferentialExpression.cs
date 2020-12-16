@@ -9,19 +9,18 @@ namespace FluentMigrator.NHibernateGenerator
 {
     public class DifferentialExpression
     {
-        public DifferentialExpression(MigrationExpressionBase upReversible)
+        public DifferentialExpression(IMigrationExpression upReversible)
         {
             Up = upReversible;
-            Down = (MigrationExpressionBase)upReversible.Reverse();
+            Down = upReversible.Reverse();
         }
-        public DifferentialExpression(MigrationExpressionBase up, MigrationExpressionBase down)
+        public DifferentialExpression(IMigrationExpression up, IMigrationExpression down)
         {
             Up = up;
             Down = down;
         }
-        public DifferentialExpression(IMigrationExpression up, MigrationExpressionBase down) : this((MigrationExpressionBase)up, down) { }
 
-        public MigrationExpressionBase Up { get; set; }
-        public MigrationExpressionBase Down { get; set; }
+        public IMigrationExpression Up { get; set; }
+        public IMigrationExpression Down { get; set; }
     }
 }

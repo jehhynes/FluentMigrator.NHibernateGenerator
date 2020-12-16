@@ -16,17 +16,17 @@ namespace FluentMigrator.NHibernateGenerator
 {
     public class DifferentialMigration : IEnumerable<DifferentialExpression>
     {
-        private readonly List<MigrationExpressionBase> _fromSchema;
-        private readonly List<MigrationExpressionBase> _toSchema;
+        private readonly List<IMigrationExpression> _fromSchema;
+        private readonly List<IMigrationExpression> _toSchema;
 
-        public DifferentialMigration(List<MigrationExpressionBase> fromSchema, List<MigrationExpressionBase> toSchema)
+        public DifferentialMigration(List<IMigrationExpression> fromSchema, List<IMigrationExpression> toSchema)
         {
             _fromSchema = fromSchema;
             _toSchema = toSchema;
         }
 
-        private static bool DefaultFilter(List<MigrationExpressionBase> a, List<MigrationExpressionBase> b,
-            MigrationExpressionBase c)
+        private static bool DefaultFilter(List<IMigrationExpression> a, List<IMigrationExpression> b,
+            IMigrationExpression c)
         {
             return true;
         }
@@ -58,9 +58,33 @@ namespace FluentMigrator.NHibernateGenerator
 
         private IEnumerable<DifferentialExpression> GetAuxObjects()
         {
-            return _fromSchema.OfType<ExecuteSqlStatementExpression>()
-                .Concat(_toSchema.OfType<ExecuteSqlStatementExpression>())
+            var fromSqlStatements = _fromSchema.OfType<ExecuteSqlStatementExpression>();
+            var toSqlStatements = _toSchema.OfType<ExecuteSqlStatementExpression>();
+
+            var sqlStatements = toSqlStatements.Where(ts => !fromSqlStatements.Any(fs => fs.SqlStatement == ts.SqlStatement))
                 .Select(x => new DifferentialExpression(x, null));
+
+            var fromInsertDatas = _fromSchema.OfType<InsertDataExpression>();
+            var toInsertDatas = _toSchema.OfType<InsertDataExpression>();
+
+            var insertDatas = toInsertDatas.Where(ts => !fromInsertDatas.Any(fs => AreSameInsertData(fs, ts)))
+                .Select(x => new DifferentialExpression(x, null));
+
+            return sqlStatements.Concat(insertDatas);
+        }
+
+        private bool AreSameInsertData(InsertDataExpression fs, InsertDataExpression ts)
+        {
+            if (fs.Rows.Count != ts.Rows.Count) return false;
+            for (int row = 0; row < fs.Rows.Count; row++)
+            {
+                var fRow = fs.Rows[row];
+                var tRow = ts.Rows[row];
+
+                if (!MatchCollection(fRow, tRow, (x, y) => x.Key == y.Key && Equals(x.Value, y.Value)))
+                    return false;
+            }
+            return true;
         }
 
         private IEnumerable<DifferentialExpression> GetNewSchemas()
@@ -180,7 +204,7 @@ namespace FluentMigrator.NHibernateGenerator
                 .Select(x => new DifferentialExpression(x.Reverse(), x));
         }
 
-        IEnumerable<CreateConstraintExpression> GetPrimaryKeys(IEnumerable<MigrationExpressionBase> schema)
+        IEnumerable<CreateConstraintExpression> GetPrimaryKeys(IEnumerable<IMigrationExpression> schema)
         {
             return schema.OfType<CreateTableExpression>().Where(t => t.Columns.Any(c => c.IsPrimaryKey))
                 .Select(t => new CreateConstraintExpression(ConstraintType.PrimaryKey)

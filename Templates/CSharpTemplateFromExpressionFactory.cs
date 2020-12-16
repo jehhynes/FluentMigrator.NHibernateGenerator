@@ -8,11 +8,11 @@ namespace FluentMigrator.NHibernateGenerator.Templates
 {
     public class CSharpTemplateFromExpressionFactory : ITemplateFromExpressionFactory
     {
-        private Dictionary<Type, Func<MigrationExpressionBase, ITemplate>> _templateLookup = InitTemplates();
+        private Dictionary<Type, Func<IMigrationExpression, ITemplate>> _templateLookup = InitTemplates();
 
-        private static Dictionary<Type, Func<MigrationExpressionBase, ITemplate>> InitTemplates()
+        private static Dictionary<Type, Func<IMigrationExpression, ITemplate>> InitTemplates()
         {
-            return new Dictionary<Type, Func<MigrationExpressionBase, ITemplate>>
+            return new Dictionary<Type, Func<IMigrationExpression, ITemplate>>
             {
                 {typeof(AlterColumnExpression), e => new AlterColumnExpressionTemplate { Expression = (AlterColumnExpression)e} },
                 {typeof(ExtendedAlterColumnExpression), e => new AlterColumnExpressionTemplate { Expression = (AlterColumnExpression)e} },
@@ -38,7 +38,7 @@ namespace FluentMigrator.NHibernateGenerator.Templates
             };
         }
 
-        public virtual ITemplate GetTemplate(MigrationExpressionBase expr)
+        public virtual ITemplate GetTemplate(IMigrationExpression expr)
         {
             var expressionType = expr.GetType();
             if (_templateLookup.ContainsKey(expressionType))
@@ -59,7 +59,7 @@ namespace FluentMigrator.NHibernateGenerator.Templates
 
             public void WriteTo(TextWriter tw)
             {
-                tw.Write("throw new NotImplementedException(\"No template implemented for {0}\");", _t.FullName);
+                tw.Write("        throw new NotImplementedException(\"No template implemented for {0}\")", _t.FullName);
             }
         }
     }

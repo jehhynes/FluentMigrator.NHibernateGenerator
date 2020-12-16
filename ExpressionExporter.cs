@@ -17,7 +17,7 @@ using Environment = NHibernate.Cfg.Environment;
 
 namespace FluentMigrator.NHibernateGenerator
 {
-    public class ExpressionExporter : IEnumerable<MigrationExpressionBase>
+    public class ExpressionExporter : IEnumerable<IMigrationExpression>
     {
         private readonly Configuration _cfg;
         private readonly Dialect _dialect;
@@ -30,7 +30,7 @@ namespace FluentMigrator.NHibernateGenerator
             _defaultSchema = PropertiesHelper.GetString(Environment.DefaultSchema, _cfg.Properties, null);
         }
 
-        public IEnumerator<MigrationExpressionBase> GetEnumerator()
+        public IEnumerator<IMigrationExpression> GetEnumerator()
         {
             var mapping = _cfg.BuildMapping();
 
@@ -99,15 +99,15 @@ namespace FluentMigrator.NHibernateGenerator
             }
         }
 
-        private IEnumerable<MigrationExpressionBase> GetIdGenerators()
+        private IEnumerable<IMigrationExpression> GetIdGenerators()
         {
             var generators = GetPersistentIdentifierGenerators(_defaultCatalog, _defaultSchema);
 
-            IEnumerable<MigrationExpressionBase> idGenerators = GetExpressionsFor(generators);
+            IEnumerable<IMigrationExpression> idGenerators = GetExpressionsFor(generators);
             return idGenerators;
         }
 
-        private IEnumerable<MigrationExpressionBase> GetExpressionsFor(List<IPersistentIdentifierGenerator> generators)
+        private IEnumerable<IMigrationExpression> GetExpressionsFor(List<IPersistentIdentifierGenerator> generators)
         {
             foreach (var g in generators)
             {
@@ -176,7 +176,7 @@ namespace FluentMigrator.NHibernateGenerator
             return generators;
         }
 
-        private static IEnumerable<MigrationExpressionBase> GetUniqueKeys(Table table)
+        private static IEnumerable<IMigrationExpression> GetUniqueKeys(Table table)
         {
             foreach (var uk in table.UniqueKeyIterator)
             {
@@ -203,9 +203,9 @@ namespace FluentMigrator.NHibernateGenerator
             }
         }
 
-        private static IEnumerable<MigrationExpressionBase> GetIndexes(Table table)
+        private static IEnumerable<IMigrationExpression> GetIndexes(Table table)
         {
-            return table.IndexIterator.Select(idx => CreateIndexExpression(table, idx)).Cast<MigrationExpressionBase>();
+            return table.IndexIterator.Select(idx => CreateIndexExpression(table, idx));
         }
 
         private static CreateIndexExpression CreateIndexExpression(Table table, Index idx)
@@ -230,13 +230,12 @@ namespace FluentMigrator.NHibernateGenerator
             };
         }
 
-        private static IEnumerable<MigrationExpressionBase> GetFKs(Table table)
+        private static IEnumerable<IMigrationExpression> GetFKs(Table table)
         {
             return table.ForeignKeyIterator
                 .Where(x => x.HasPhysicalConstraint)
                 .Select(fk => GetCreateForeignKeyExpression(table, fk))
-                .Where(x => x != null)
-                .Cast<MigrationExpressionBase>();
+                .Where(x => x != null);
         }
 
         private static CreateForeignKeyExpression GetCreateForeignKeyExpression(Table table, ForeignKey fk)

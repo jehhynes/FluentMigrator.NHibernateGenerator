@@ -25,8 +25,8 @@ namespace FluentMigrator.NHibernateGenerator
             return version.ToString().PadLeft(8, '0') + "_";
         }
         
-        protected virtual bool FilterExpressions(List<MigrationExpressionBase> @from, List<MigrationExpressionBase> @to,
-            MigrationExpressionBase expression)
+        protected virtual bool FilterExpressions(List<IMigrationExpression> @from, List<IMigrationExpression> @to,
+            IMigrationExpression expression)
         {
             return true;
         }
@@ -111,7 +111,7 @@ namespace FluentMigrator.NHibernateGenerator
             return lastMigration + 1;
         }
 
-        protected virtual List<MigrationExpressionBase> GetToExpressions()
+        protected virtual List<IMigrationExpression> GetToExpressions()
         {
             var configuration = GetConfiguration();
             configuration.BuildMappings();
@@ -121,12 +121,12 @@ namespace FluentMigrator.NHibernateGenerator
 
         protected abstract Configuration GetConfiguration();
 
-        protected virtual List<MigrationExpressionBase> GetFromExpressions()
+        protected virtual List<IMigrationExpression> GetFromExpressions()
         {
             return GetFromExpressionList(MigrationAssembly);
         }
 
-        public static string SerializeConfiguration(List<MigrationExpressionBase> expressions)
+        public static string SerializeConfiguration(List<IMigrationExpression> expressions)
         {
             var ms = new MemoryStream();
             using (var gs = new GZipStream(ms, CompressionLevel.Optimal, true))
@@ -142,7 +142,7 @@ namespace FluentMigrator.NHibernateGenerator
             return Convert.ToBase64String(ms.ToArray());
         }
 
-        public static List<MigrationExpressionBase> DeserializeConfiguration(string source)
+        public static List<IMigrationExpression> DeserializeConfiguration(string source)
         {
             var bytes = Convert.FromBase64String(source);
             var ms = new MemoryStream(bytes);
@@ -150,15 +150,31 @@ namespace FluentMigrator.NHibernateGenerator
             using (var sr = new StreamReader(gs))
             {
                 var src = sr.ReadToEnd();
-                return JsonConvert.DeserializeObject<List<MigrationExpressionBase>>(src, new JsonSerializerSettings
+                var settings = new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.All,
                     Formatting = Formatting.Indented
-                });
+                };
+
+                try
+                {
+                    return JsonConvert.DeserializeObject<List<IMigrationExpression>>(src, settings);
+                }
+                catch
+                {
+                    try
+                    {
+                        //backward compatibility
+                        return JsonConvert.DeserializeObject<List<MigrationExpressionBase>>(src, settings).Cast<IMigrationExpression>().ToList();
+                    }
+                    catch { }
+
+                    throw;
+                }
             }
         }
 
-        public static List<MigrationExpressionBase> GetFromExpressionList(Assembly migrationsAssembly)
+        public static List<IMigrationExpression> GetFromExpressionList(Assembly migrationsAssembly)
         {
             var lastMigration = migrationsAssembly.ExportedTypes.Where(t => typeof(Migration).IsAssignableFrom(t))
                 .Where(s => HasConfigurationData(s))
@@ -167,7 +183,7 @@ namespace FluentMigrator.NHibernateGenerator
 
             if (lastMigration == null)
             {
-                return new List<MigrationExpressionBase>();
+                return new List<IMigrationExpression>();
             }
 
             var f = lastMigration.GetField("ConfigurationData", BindingFlags.Public | BindingFlags.Static);
