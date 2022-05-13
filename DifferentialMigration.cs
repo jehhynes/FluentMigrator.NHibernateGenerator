@@ -25,33 +25,31 @@ namespace FluentMigrator.NHibernateGenerator
             _toSchema = toSchema;
         }
 
-        private static bool DefaultFilter(List<IMigrationExpression> a, List<IMigrationExpression> b,
-            IMigrationExpression c)
-        {
-            return true;
-        }
 
         public IEnumerator<DifferentialExpression> GetEnumerator()
         {
             if (_fromSchema == null || _fromSchema.Count == 0)
                 return _toSchema.Select(x => new DifferentialExpression(x, null)).GetEnumerator();
 
+            var updatedTables = GetUpdatedTables();
+            var alteredColumns = updatedTables.Select(x => x.Up).OfType<AlterColumnExpression>().ToList();
+
             return
-                GetRemovedIndexes()
+                GetRemovedIndexes(alteredColumns)
                 .Concat(GetRemovedPrimaryKeys())
                 .Concat(GetRemovedForeignKeys())
                 .Concat(GetRemovedTables())
                 .Concat(GetRemovedSequences())
                 .Concat(GetRemovedSchemas())
 
-                .Concat(GetUpdatedTables())
+                .Concat(updatedTables)
 
                 .Concat(GetNewSchemas())
                 .Concat(GetNewSequences())
                 .Concat(GetNewTables())
                 .Concat(GetNewPrimaryKeys())
                 .Concat(GetNewForeignKeys())
-                .Concat(GetNewIndexes())
+                .Concat(GetNewIndexes(alteredColumns))
                 .Concat(GetAuxObjects())
                 .GetEnumerator();
         }
@@ -95,13 +93,13 @@ namespace FluentMigrator.NHibernateGenerator
                 .Select(x => new DifferentialExpression(x));
         }
 
-        private IEnumerable<DifferentialExpression> GetRemovedIndexes()
+        private IEnumerable<DifferentialExpression> GetRemovedIndexes(IEnumerable<AlterColumnExpression> alterColumns)
         {
             var fromIxs = _fromSchema.OfType<CreateIndexExpression>().ToList();
 
             var toIxs = _toSchema.OfType<CreateIndexExpression>().ToList();
 
-            return fromIxs.Where(f => !toIxs.Any(t => AreSameIndexName(f.Index, t.Index)))
+            return fromIxs.Where(f => !toIxs.Any(t => AreSameIndexName(f.Index, t.Index)) || alterColumns.Any(a => AreSameTableName(a, f)))
                 .Select(f => new DifferentialExpression(f.Reverse(), f));
         }
 
@@ -116,13 +114,13 @@ namespace FluentMigrator.NHibernateGenerator
             var toPks = _toSchema.OfType<CreateConstraintExpression>()
                 .Where(c => c.Constraint.IsPrimaryKeyConstraint).ToList();
 
-            var pksDelta = toPks.Where(t => !fromPks.Any(f => AreSameTableName(f, t)))
+            var pksDelta = toPks.Where(t => !fromPks.Any(f => AreSameConstraintName(f, t)))
                 .Select(x => new DifferentialExpression(x));
 
             return tablesDelta.Concat(pksDelta);
         }
 
-        private bool AreSameTableName(CreateConstraintExpression f, CreateConstraintExpression t)
+        private bool AreSameConstraintName(CreateConstraintExpression f, CreateConstraintExpression t)
         {
             return f.Constraint.SchemaName == t.Constraint.SchemaName && f.Constraint.TableName == t.Constraint.TableName && f.Constraint.ConstraintName == t.Constraint.ConstraintName;
         }
@@ -148,7 +146,7 @@ namespace FluentMigrator.NHibernateGenerator
             var alteredPks = toPks.Select(t => new
             {
                 To = t,
-                From = fromPks.FirstOrDefault(f => AreSameTableName(f, t))
+                From = fromPks.FirstOrDefault(f => AreSameConstraintName(f, t))
             })
                 .Where(x => x.From != null && !AreSameKeyDef(x.From, x.To))
                 .SelectMany(x => GetAlters(x.From, x.To));
@@ -173,7 +171,7 @@ namespace FluentMigrator.NHibernateGenerator
 
         private bool AreSameKeyDef(CreateConstraintExpression @from, CreateConstraintExpression to)
         {
-            return AreSameTableName(@from, to) &&
+            return AreSameConstraintName(@from, to) &&
             MatchStrings(from.Constraint.Columns, to.Constraint.Columns);
         }
 
@@ -239,12 +237,12 @@ namespace FluentMigrator.NHibernateGenerator
                 .Select(x => new DifferentialExpression(x.Reverse(), x));
         }
 
-        private IEnumerable<DifferentialExpression> GetNewIndexes()
+        private IEnumerable<DifferentialExpression> GetNewIndexes(IEnumerable<AlterColumnExpression> alterColumns)
         {
             var fromIndexes = _fromSchema.OfType<CreateIndexExpression>().ToList();
             var toIndexes = _toSchema.OfType<CreateIndexExpression>().ToList();
 
-            return toIndexes.Where(t => !fromIndexes.Any(f => AreSameIndexName(f.Index, t.Index)))
+            return toIndexes.Where(t => !fromIndexes.Any(f => AreSameIndexName(f.Index, t.Index)) || alterColumns.Any(a => AreSameTableName(a, t)))
                 .Select(x => new DifferentialExpression(x));
         }
 
@@ -290,9 +288,17 @@ namespace FluentMigrator.NHibernateGenerator
             return GetEnumerator();
         }
 
+        private bool AreSameTableName(AlterColumnExpression from, CreateIndexExpression to)
+        {
+            return AreSameTableName(from.SchemaName, from.TableName, to.Index.SchemaName, to.Index.TableName);
+        }
         private bool AreSameTableName(CreateTableExpression fromTable, CreateTableExpression toTable)
         {
-            return fromTable.SchemaName == toTable.SchemaName && fromTable.TableName == toTable.TableName;
+            return AreSameTableName(fromTable.SchemaName, fromTable.TableName, toTable.SchemaName, toTable.TableName);
+        }
+        private bool AreSameTableName(string fromSchema, string fromTable, string toSchema, string toTable)
+        {
+            return fromSchema == toSchema && fromTable == toTable;
         }
 
         private bool MatchIndexColumns(ICollection<IndexColumnDefinition> fromIx, ICollection<IndexColumnDefinition> toIx)
