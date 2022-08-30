@@ -6,39 +6,31 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
+#if NETCOREAPP
+using System.Runtime.Loader;
+#endif
+
 namespace FluentMigrator.NHibernateGenerator
 {
     public static class NugetTooling
     {
-        public static object Generate(string targetPath, string assemblyName, string migrationName)
+        public static object Generate(string assemblyPath, string migrationName)
         {
-            string targetFileName = Path.GetFileName(targetPath);
-            string targetDir = Path.GetDirectoryName(targetPath);
-            
-            AppDomainSetup info = new AppDomainSetup
-            {
-                ShadowCopyFiles = "true",
-                ApplicationBase = targetDir,
-                ConfigurationFile = targetFileName + ".config"
-            };
-
-            var appDomain = AppDomain.CreateDomain("NHMigrations" + Convert.ToBase64String(Guid.NewGuid().ToByteArray()), null, info);
+            var appDomain = AppDomain.CurrentDomain;
 
             var proxy = (MigrationProxy)appDomain.CreateInstanceAndUnwrap(typeof(MigrationProxy).Assembly.FullName, typeof(MigrationProxy).FullName);
 
-            var migration = proxy.Generate(targetDir, assemblyName, migrationName);
-
-            AppDomain.Unload(appDomain);
+            var migration = proxy.Generate(assemblyPath, migrationName);
 
             return migration;
         }
 
         public class MigrationProxy : MarshalByRefObject
         {
-            public GeneratedMigration Generate(string projectRoot, string migrationAssemblyName, string migrationName)
+            public GeneratedMigration Generate(string assemblyPath, string migrationName)
             {
-                var assembly = Assembly.Load(migrationAssemblyName);
-           
+                var assembly = Assembly.LoadFrom(assemblyPath);
+
                 var migrationConfigTypes = assembly.GetTypes().Where(x => x.IsClass && !x.IsAbstract
                     && typeof(MigrationConfigurationBase).IsAssignableFrom(x)).ToList();
 

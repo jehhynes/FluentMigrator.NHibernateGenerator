@@ -208,7 +208,7 @@ namespace FluentMigrator.NHibernateGenerator
             return table.IndexIterator.Select(idx => CreateIndexExpression(table, idx));
         }
 
-        private static CreateIndexExpression CreateIndexExpression(Table table, Index idx)
+        private static CreateIndexExpression CreateIndexExpression(Table table, NHibernate.Mapping.Index idx)
         {
             var indexDefinition = new IndexDefinition()
             {

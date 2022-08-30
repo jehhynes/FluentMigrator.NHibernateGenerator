@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+	<metadata minClientVersion="3.6">
+		<id>FluentMigratorNHibernateGenerator</id>
+		<version>2.0.0</version>
+		<authors>Jonathan Hynes</authors>
+		<projectUrl>https://github.com/jehhynes/FluentMigrator.NHibernateGenerator</projectUrl>
+		<license type="expression">MIT</license>
+		<releaseNotes>https://github.com/jehhynes/FluentMigrator.NHibernateGenerator/releases</releaseNotes>
+		<description>Adds a command to the package manager console to generate migrations for FluentMigrator based on NHibernate mappings.</description>
+		<copyright>Copyright 2022 Jonathan Hynes</copyright>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<developmentDependency>true</developmentDependency>
+		<language>en-US</language>
+		<tags>fluentmigrator nhibernate</tags>
+		<dependencies>
+			<group targetFramework="net461">
+				<dependency id="FluentMigrator" version="3.2.15" />
+				<dependency id="FluentMigrator.Extensions.SqlServer" version="3.2.15" />
+				<dependency id="NHibernate" version="5.3.10" />
+			</group>
+			<group targetFramework="netcoreapp3.1" >
+				<dependency id="FluentMigrator" version="3.2.15" />
+				<dependency id="FluentMigrator.Extensions.SqlServer" version="3.2.15" />
+				<dependency id="NHibernate" version="5.3.10" />
+			</group>
+		</dependencies>
+  </metadata>
+  <files>
+	<file src="tools\**\*" target="tools/" />
+	<file src="bin/debug/net461/FluentMigrator.NHibernateGenerator.dll" target="lib/net461/" />
+	<file src="../GenTool/bin/debug/net461/GenTool.exe" target="tools/net461/" />
+	<file src="bin/debug/net461/FluentMigrator.NHibernateGenerator.dll" target="tools/net461/" />
+	<!--FSR System.Net.Http.dll is required-->
+	<file src="..\GenTool\bin\debug\net461\System.Net.Http.dll" target="tools/net461/" />
+
+	<file src="bin/debug/netcoreapp3.1/FluentMigrator.NHibernateGenerator.dll" target="lib/netcoreapp3.1/" />
+	<file src="../GenTool/bin/debug/netcoreapp3.1/GenTool.dll" target="tools/netcoreapp3.1/" />
+	<file src="../GenTool/bin/debug/netcoreapp3.1/GenTool.runtimeconfig.json" target="tools/netcoreapp3.1/" />
+  </files>
+</package>

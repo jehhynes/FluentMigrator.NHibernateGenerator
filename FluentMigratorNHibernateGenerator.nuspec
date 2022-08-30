@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>FluentMigratorNHibernateGenerator</id>
-    <version>1.1.11</version>
+    <version>1.1.12.1007</version>
     <authors>Jonathan Hynes</authors>
     <projectUrl>https://github.com/jehhynes/FluentMigrator.NHibernateGenerator</projectUrl>
     <licenseUrl>https://raw.githubusercontent.com/jehhynes/FluentMigrator.NHibernateGenerator/master/LICENSE</licenseUrl>
@@ -20,8 +20,13 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\Debug\FluentMigrator.NHibernateGenerator.dll" target="lib" />
-    <file src="FluentMigratorNHibernateGenerator.psm1" target="tools" />
+	<file src="bin/debug/net461/FluentMigrator.NHibernateGenerator.exe" target="lib/net461" />
+	<file src="bin/debug/net461/FluentMigrator.NHibernateGenerator.pdb" target="lib/net461" />
+
+	<file src="bin/debug/netcoreapp3.1/FluentMigrator.NHibernateGenerator.dll" target="lib/netcoreapp3.1" />
+	<file src="bin/debug/netcoreapp3.1/FluentMigrator.NHibernateGenerator.pdb" target="lib/netcoreapp3.1" />
+
+	<file src="FluentMigratorNHibernateGenerator.psm1" target="tools" />
     <file src="FluentMigratorNHibernateGenerator.psd1" target="tools" />
     <file src="init.ps1" target="tools" />
   </files>
