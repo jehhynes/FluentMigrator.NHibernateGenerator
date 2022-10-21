@@ -99,7 +99,7 @@ namespace FluentMigrator.NHibernateGenerator
 
             var toIxs = _toSchema.OfType<CreateIndexExpression>().ToList();
 
-            return fromIxs.Where(f => !toIxs.Any(t => AreSameIndexName(f.Index, t.Index)) || alterColumns.Any(a => AreSameTableName(a, f)))
+            return fromIxs.Where(f => !toIxs.Any(t => AreSameIndex(f.Index, t.Index)) || alterColumns.Any(a => IsIndexDependentOnColumn(a, f)))
                 .Select(f => new DifferentialExpression(f.Reverse(), f));
         }
 
@@ -242,7 +242,7 @@ namespace FluentMigrator.NHibernateGenerator
             var fromIndexes = _fromSchema.OfType<CreateIndexExpression>().ToList();
             var toIndexes = _toSchema.OfType<CreateIndexExpression>().ToList();
 
-            return toIndexes.Where(t => !fromIndexes.Any(f => AreSameIndexName(f.Index, t.Index)) || alterColumns.Any(a => AreSameTableName(a, t)))
+            return toIndexes.Where(t => !fromIndexes.Any(f => AreSameIndex(f.Index, t.Index)) || alterColumns.Any(a => IsIndexDependentOnColumn(a, t)))
                 .Select(x => new DifferentialExpression(x));
         }
 
@@ -288,9 +288,14 @@ namespace FluentMigrator.NHibernateGenerator
             return GetEnumerator();
         }
 
-        private bool AreSameTableName(AlterColumnExpression from, CreateIndexExpression to)
+        private bool IsIndexDependentOnColumn(AlterColumnExpression ac, CreateIndexExpression ci)
         {
-            return AreSameTableName(from.SchemaName, from.TableName, to.Index.SchemaName, to.Index.TableName);
+            var index = ci.Index;
+            return AreSameTableName(ac.SchemaName, ac.TableName, index.SchemaName, index.TableName)
+                && (
+                    index.Columns.Any(c => c.Name.Equals(ac.Column.Name, StringComparison.OrdinalIgnoreCase))
+                    || index.GetIncludes().Any(c => c.Name.Equals(ac.Column.Name, StringComparison.OrdinalIgnoreCase))
+                );
         }
         private bool AreSameTableName(CreateTableExpression fromTable, CreateTableExpression toTable)
         {
@@ -345,7 +350,7 @@ namespace FluentMigrator.NHibernateGenerator
                 && MatchStrings(fromConstraint.Columns, toConstraint.Columns);
         }
 
-        private bool AreSameIndexName(IndexDefinition fromIx, IndexDefinition toIx)
+        private bool AreSameIndex(IndexDefinition fromIx, IndexDefinition toIx)
         {
             return fromIx.SchemaName == toIx.SchemaName && fromIx.TableName == toIx.TableName
                 && fromIx.IsClustered == toIx.IsClustered && fromIx.IsUnique == toIx.IsUnique
