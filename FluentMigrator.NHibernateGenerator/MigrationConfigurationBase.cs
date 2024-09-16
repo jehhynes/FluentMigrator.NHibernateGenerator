@@ -68,7 +68,8 @@ namespace FluentMigrator.NHibernateGenerator
                     Name = name,
                     Version = version,
                     MigrationsDirectory = MigrationsDirectory,
-                    FileNamePrefix = GetFileNamePrefix(version)
+                    FileNamePrefix = GetFileNamePrefix(version),
+                    CodeFile = code
                 };
 
                 using (var sw = new StringWriter())

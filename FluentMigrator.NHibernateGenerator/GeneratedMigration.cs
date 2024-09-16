@@ -1,3 +1,4 @@
+using FluentMigrator.NHibernateGenerator.Templates.CSharp;
 using System;
 
 namespace FluentMigrator.NHibernateGenerator
@@ -12,5 +13,6 @@ namespace FluentMigrator.NHibernateGenerator
         public string MigrationsDirectory { get; set; }
         public string FileNamePrefix { get; set; }
         public string ErrorMessage { get; set; }
+        public MigrationCodeFile CodeFile { get; set; }
     }
 }

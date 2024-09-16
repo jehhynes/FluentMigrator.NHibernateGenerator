@@ -6,7 +6,7 @@ using FluentMigrator.Expressions;
 
 namespace FluentMigrator.NHibernateGenerator.Templates.CSharp
 {
-    internal class MigrationCodeFile : ITemplate
+    public class MigrationCodeFile : ITemplate
     {
         public virtual string MigrationBaseClassName { get; set; }
         public virtual string Namespace { get; set; }

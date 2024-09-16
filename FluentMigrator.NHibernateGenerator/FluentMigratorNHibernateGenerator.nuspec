@@ -2,13 +2,13 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
 	<metadata minClientVersion="3.6">
 		<id>FluentMigratorNHibernateGenerator</id>
-		<version>2.0.1</version>
+		<version>2.0.2</version>
 		<authors>Jonathan Hynes</authors>
 		<projectUrl>https://github.com/jehhynes/FluentMigrator.NHibernateGenerator</projectUrl>
 		<license type="expression">MIT</license>
 		<releaseNotes>https://github.com/jehhynes/FluentMigrator.NHibernateGenerator/releases</releaseNotes>
 		<description>Adds a command to the package manager console to generate migrations for FluentMigrator based on NHibernate mappings.</description>
-		<copyright>Copyright 2022 Jonathan Hynes</copyright>
+		<copyright>Copyright 2024 Jonathan Hynes</copyright>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<developmentDependency>true</developmentDependency>
 		<language>en-US</language>
