@@ -238,7 +238,7 @@ namespace FluentMigrator.NHibernateGenerator
                 .Where(x => x != null);
         }
 
-        private static CreateForeignKeyExpression GetCreateForeignKeyExpression(Table table, ForeignKey fk)
+        public static CreateForeignKeyExpression GetCreateForeignKeyExpression(Table table, ForeignKey fk)
         {
             if (fk.ReferencedTable == null) return null;
 
@@ -275,7 +275,7 @@ namespace FluentMigrator.NHibernateGenerator
             return table.HasPrimaryKey && table.PrimaryKey.ColumnIterator.Any(x => x.Equals(c));
         }
 
-        private ColumnDefinition ColumnDefinition(Table table, IMapping mapping, Column c, int i)
+        public ColumnDefinition ColumnDefinition(Table table, IMapping mapping, Column c, int i)
         {
             var columnDefinition = new ColumnDefinition();
 
