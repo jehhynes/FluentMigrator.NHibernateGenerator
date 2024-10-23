@@ -43,6 +43,7 @@ namespace FluentMigrator.NHibernateGenerator
                 .Concat(GetRemovedSchemas())
 
                 .Concat(updatedTables)
+                .Concat(GetRenamedIndexes())
 
                 .Concat(GetNewSchemas())
                 .Concat(GetNewSequences())
@@ -101,6 +102,20 @@ namespace FluentMigrator.NHibernateGenerator
 
             return fromIxs.Where(f => !toIxs.Any(t => AreSameIndex(f.Index, t.Index)) || alterColumns.Any(a => IsIndexDependentOnColumn(a, f)))
                 .Select(f => new DifferentialExpression(f.Reverse(), f));
+        }
+
+        private IEnumerable<DifferentialExpression> GetRenamedIndexes()
+        {
+            var fromIxs = _fromSchema.OfType<CreateIndexExpression>().ToList();
+            var toIxs = _toSchema.OfType<CreateIndexExpression>().ToList();
+
+            return toIxs.Select(t => new { ToIndex = t, Candidates = fromIxs.Where(f => AreSameIndex(f.Index, t.Index)).ToList() })
+                .Where(x => x.Candidates.Count == 1 && x.Candidates.Single().Index.Name != x.ToIndex.Index.Name)
+                .Select(x => new { x.ToIndex, FromIndex = x.Candidates.Single() })
+                .Select(x => new DifferentialExpression(
+                    new RenameIndexExpression(x.ToIndex.Index.SchemaName, x.ToIndex.Index.TableName, x.FromIndex.Index.Name, x.ToIndex.Index.Name),
+                    new RenameIndexExpression(x.ToIndex.Index.SchemaName, x.ToIndex.Index.TableName, x.ToIndex.Index.Name, x.FromIndex.Index.Name)
+                ));
         }
 
         private IEnumerable<DifferentialExpression> GetNewTables()

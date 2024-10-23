@@ -23,6 +23,7 @@ namespace FluentMigrator.NHibernateGenerator.Templates
                 {typeof(CreateConstraintExpression), e => new CreateConstraintExpressionTemplate { Expression = (CreateConstraintExpression)e} },
                 {typeof(CreateForeignKeyExpression), e => new CreateForeignKeyExpressionTemplate { Expression = (CreateForeignKeyExpression)e} },
                 {typeof(CreateIndexExpression), e => new CreateIndexExpressionTemplate { Expression = (CreateIndexExpression)e} },
+                {typeof(RenameIndexExpression), e => new RenameIndexExpressionTemplate { Expression = (RenameIndexExpression)e} },
                 {typeof(CreateSchemaExpression), e => new CreateSchemaExpressionTemplate { Expression = (CreateSchemaExpression)e} },
                 {typeof(CreateSequenceExpression), e => new CreateSequenceExpressionTemplate { Expression = (CreateSequenceExpression)e} },
                 {typeof(CreateTableExpression), e => new CreateTableExpressionTemplate { Expression = (CreateTableExpression)e} },
